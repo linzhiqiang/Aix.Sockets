@@ -1,0 +1,53 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.28922.388
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{DC71ADA8-C982-4B45-A081-63529C1EF065}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AixSocket", "src\AixSocket\AixSocket.csproj", "{9E6A10F5-311D-4077-9B4B-C2271F8BD8F0}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{212E5D94-887C-4932-9A64-751A2AC64467}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AixSocketDemo.Common", "samples\AixSocketDemo.Common\AixSocketDemo.Common.csproj", "{17FB4157-63BD-4439-88CA-186D57C2AA30}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AixSocketDemo.Server", "samples\AixSocketDemo.Server\AixSocketDemo.Server.csproj", "{F364E391-FF6B-44A7-857D-F89E0378FBF3}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AixSocketDemo.Client", "samples\AixSocketDemo.Client\AixSocketDemo.Client.csproj", "{B0D00354-8AD4-45B8-8859-E3A58886F959}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{9E6A10F5-311D-4077-9B4B-C2271F8BD8F0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9E6A10F5-311D-4077-9B4B-C2271F8BD8F0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9E6A10F5-311D-4077-9B4B-C2271F8BD8F0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9E6A10F5-311D-4077-9B4B-C2271F8BD8F0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{17FB4157-63BD-4439-88CA-186D57C2AA30}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{17FB4157-63BD-4439-88CA-186D57C2AA30}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{17FB4157-63BD-4439-88CA-186D57C2AA30}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{17FB4157-63BD-4439-88CA-186D57C2AA30}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F364E391-FF6B-44A7-857D-F89E0378FBF3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F364E391-FF6B-44A7-857D-F89E0378FBF3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F364E391-FF6B-44A7-857D-F89E0378FBF3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F364E391-FF6B-44A7-857D-F89E0378FBF3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B0D00354-8AD4-45B8-8859-E3A58886F959}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B0D00354-8AD4-45B8-8859-E3A58886F959}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B0D00354-8AD4-45B8-8859-E3A58886F959}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B0D00354-8AD4-45B8-8859-E3A58886F959}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{9E6A10F5-311D-4077-9B4B-C2271F8BD8F0} = {DC71ADA8-C982-4B45-A081-63529C1EF065}
+		{17FB4157-63BD-4439-88CA-186D57C2AA30} = {212E5D94-887C-4932-9A64-751A2AC64467}
+		{F364E391-FF6B-44A7-857D-F89E0378FBF3} = {212E5D94-887C-4932-9A64-751A2AC64467}
+		{B0D00354-8AD4-45B8-8859-E3A58886F959} = {212E5D94-887C-4932-9A64-751A2AC64467}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {8C2ED02C-8BDE-456C-B610-4A8AEB2F40E9}
+	EndGlobalSection
+EndGlobal
