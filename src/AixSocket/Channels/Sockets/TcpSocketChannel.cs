@@ -161,6 +161,7 @@ namespace AixSocket.Channels.Sockets
                 var sent = this.Socket.Send(data, offset, size, SocketFlags.None, out SocketError errorCode);
                 if (errorCode != SocketError.Success)
                 {
+                    Logger.LogError($"Send SocketError:{errorCode}");
                     throw new SocketException((int)errorCode);
                 }
                 //if (errorCode != SocketError.Success && errorCode != SocketError.WouldBlock)
@@ -240,6 +241,7 @@ namespace AixSocket.Channels.Sockets
             }
             catch (SocketException ex)
             {
+                Logger.LogError($"SocketError:{ex.SocketErrorCode}");
                 if (ex.SocketErrorCode != SocketError.WouldBlock)
                 {
                     closed = true;
@@ -282,6 +284,7 @@ namespace AixSocket.Channels.Sockets
                         int received = e.AcceptSocket.Receive(byteBuf.Array, byteBuf.WriterIndex, byteBuf.WritableBytes, SocketFlags.None, out SocketError errorCode);
                         if (errorCode != SocketError.Success)
                         {
+                            Logger.LogError($"Receive SocketError:{errorCode}");
                             throw new SocketException((int)errorCode);
                         }
                         if (received == 0)
@@ -339,7 +342,8 @@ namespace AixSocket.Channels.Sockets
                 }
                 else
                 {
-                    Logger.LogError(ex, "socket阻塞");
+                    Logger.LogError(ex, $"socket阻塞,SocketError={ex.SocketErrorCode}");
+                    //MyThread.Sleep(1000);
                 }
             }
             catch (ObjectDisposedException)

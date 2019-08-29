@@ -28,7 +28,7 @@ namespace AixSocketDemo.Client
         public static async Task Test()
         {
             InternalLoggerFactory.DefaultFactory.AddConsoleLogger();
-            MultithreadEventLoopGroup workerGroup = new MultithreadEventLoopGroup(1);
+            MultithreadEventLoopGroup workerGroup = new MultithreadEventLoopGroup(8);
             workerGroup.Start();
 
             var bootstrap = new ClientBootstrap();
@@ -47,12 +47,12 @@ namespace AixSocketDemo.Client
 			//ip="192.168.111.133";
             int port = 8007;
 
-            for (int i = 0; i < 100; i++)
+            for (int i = 0; i < 8; i++)
             {
                 Task.Run(async () =>
                 {
                     var client = await bootstrap.ConnectAsync(new IPEndPoint(IPAddress.Parse(ip), port));
-                    await Test(1000, client);
+                    await Test(1000000, client);
                 });
             }
 
@@ -63,8 +63,8 @@ namespace AixSocketDemo.Client
             for (int i = 0; i < count; i++)
             {
                 Message message = new Message() { MessageType = MessageType.Request };
-                message.Data = Encoding.UTF8.GetBytes(i + GetLargeMsg(10));
-               await  client.WriteAsync(message);
+                message.Data = Encoding.UTF8.GetBytes(i + GetLargeMsg(100));
+                await client.WriteAsync(message);
                 //await Task.Delay(3000);
             }
             GC.Collect();

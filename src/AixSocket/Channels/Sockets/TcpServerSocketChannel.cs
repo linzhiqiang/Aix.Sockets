@@ -34,6 +34,23 @@ namespace AixSocket.Channels.Sockets
         {
             this.Socket = socket;
             this.Open = true;
+            try
+            {
+                this.Socket.Blocking = false;
+            }
+            catch (SocketException ex)
+            {
+                try
+                {
+                    socket.Dispose();
+                }
+                catch (SocketException ex2)
+                {
+                    Logger.LogError(ex2, "Failed to close a partially initialized socket.");
+                }
+
+                throw new Exception("Failed to enter non-blocking mode.", ex);
+            }
         }
 
         protected override EndPoint GetLocalAddress()
