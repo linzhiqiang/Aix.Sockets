@@ -52,7 +52,7 @@ namespace AixSocketDemo.Client
                 Task.Run(async () =>
                 {
                     var client = await bootstrap.ConnectAsync(new IPEndPoint(IPAddress.Parse(ip), port));
-                    await Test(1000, client);
+                    await Test(10000, client);
                 });
 
                // await Task.Delay(10);
