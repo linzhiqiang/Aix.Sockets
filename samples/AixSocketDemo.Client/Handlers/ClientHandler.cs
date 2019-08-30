@@ -1,4 +1,4 @@
-﻿using AixSocket.Channels;
+﻿using Aix.SocketCore.Channels;
 using AixSocket.Logging;
 using AixSocketDemo.Common.Codecs;
 using Microsoft.Extensions.Logging;

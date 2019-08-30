@@ -1,5 +1,6 @@
-﻿using AixSocket.Channels;
-using AixSocket.DefaultHandlers;
+﻿using Aix.SocketCore.Channels;
+using Aix.SocketCore.DefaultHandlers;
+using Aix.SocketCore.Logging;
 using AixSocket.Logging;
 using AixSocketDemo.Common.Codecs;
 using Microsoft.Extensions.Logging;

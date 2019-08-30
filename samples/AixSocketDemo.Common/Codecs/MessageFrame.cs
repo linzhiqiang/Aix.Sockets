@@ -1,5 +1,5 @@
-﻿using AixSocket.Buffers;
-using AixSocket.Utils;
+﻿using Aix.SocketCore.Buffers;
+using Aix.SocketCore.Utils;
 using System;
 using System.Collections.Generic;
 using System.Text;

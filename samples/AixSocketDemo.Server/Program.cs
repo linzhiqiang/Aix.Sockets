@@ -1,10 +1,10 @@
-﻿using AixSocket;
-using AixSocket.Bootstrapping;
-using AixSocket.Channels;
-using AixSocket.Channels.Sockets;
-using AixSocket.Config;
-using AixSocket.DefaultHandlers;
-using AixSocket.EventLoop;
+﻿using Aix.SocketCore;
+using Aix.SocketCore.Bootstrapping;
+using Aix.SocketCore.Channels;
+using Aix.SocketCore.Channels.Sockets;
+using Aix.SocketCore.Config;
+using Aix.SocketCore.DefaultHandlers;
+using Aix.SocketCore.EventLoop;
 using AixSocket.Logging;
 using AixSocketDemo.Common.Codecs;
 using AixSocketDemo.Server.Handlers;
