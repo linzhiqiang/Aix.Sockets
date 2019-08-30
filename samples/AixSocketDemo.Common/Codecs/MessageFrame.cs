@@ -44,9 +44,9 @@ namespace AixSocketDemo.Common.Codecs
                         throw new Exception("包长超过最大值");
                     }
                 }
-                if (Status == 1 && cumulationBuff.ReadableBytes >= bodyLength)  //解析body
+                if (Status == 1 && cumulationBuff.ReadableBytes >= bodyLength+ HEADER_LENGTH)  //解析body
                 {
-                    byte[] frameData = cumulationBuff.ReadeBytes(cumulationBuff.ReaderIndex, bodyLength);
+                    byte[] frameData = cumulationBuff.ReadeBytes(cumulationBuff.ReaderIndex, bodyLength+ HEADER_LENGTH);
                     Status = 0;
 
                     list.Add(Decode(frameData));

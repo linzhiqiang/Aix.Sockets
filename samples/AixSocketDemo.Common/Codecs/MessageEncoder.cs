@@ -39,10 +39,10 @@ namespace AixSocketDemo.Common.Codecs
 
             var routeDatas = System.Text.Encoding.UTF8.GetBytes(msg.Route ?? string.Empty);
 
+            //8(固定header长度)+4(requestId长度)+4(routeDatas长度)+routeDatas.Length+msg.Data.Length
+            bodyLength = 4 + 4 + routeDatas.Length + msg.Data.Length;
 
-            bodyLength = 12 + 4 + routeDatas.Length + msg.Data.Length;
-
-            var datas = new byte[bodyLength];
+            var datas = new byte[bodyLength+8];
 
             int offset = 0;
             Write(first4Bytes, datas, ref offset);
