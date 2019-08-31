@@ -1,5 +1,6 @@
 ﻿using Aix.SocketCore.Buffers;
 using Aix.SocketCore.Channels;
+using Aix.SocketCore.Codecs;
 using Aix.SocketCore.Utils;
 using System;
 using System.Collections.Generic;
@@ -7,46 +8,35 @@ using System.Text;
 
 namespace AixSocketDemo.Common.Codecs
 {
-  public  class MessageDecoder : ChannelHandlerAdapter
+   
+
+    /// <summary>
+    /// 解析为Message
+    /// </summary>
+    public class MessageDecoder: MessageToMessageDecoder<IByteBuffer>
     {
-        MessageFrame MessageFrame = new MessageFrame();
-        //public override void ChannelRead(IChannelHandlerContext context, object message)
-        //{
-        //    byte[] data = message as byte[];
-        //    if (data != null)
-        //    {
-        //      var list =   MessageFrame.AddAndGetMessage(data,0, data.Length);
-        //        foreach (var item in list)
-        //        {
-        //            context.FireChannelRead(item);
-        //        }
-        //    }
-        //    else
-        //    {
-        //        context.FireChannelRead(message);
-        //        //base.ChannelRead(context, message);
-        //    }
-            
-        //}
-
-        public override void ChannelRead(IChannelHandlerContext context, object message)
+        protected override void Decode(IChannelHandlerContext context, IByteBuffer byteBuffer, List<object> output)
         {
-            IByteBuffer byteBuf = message as IByteBuffer;
-            if (byteBuf != null)
+            Message message = new Message();
+
+            message.Reserved1 = byteBuffer.ReadByte();
+            message.Reserved2 = byteBuffer.ReadByte();
+            message.Reserved3 = byteBuffer.ReadByte();
+            message.MessageType = (MessageType)byteBuffer.ReadByte();
+
+            var bodyLength = byteBuffer.ReadInt();
+
+            message.RequestId = byteBuffer.ReadInt();
+
+            var routeLength = byteBuffer.ReadInt();
+            if (routeLength > 0)
             {
-                var list = MessageFrame.AddAndGetMessage(byteBuf);
-                foreach (var item in list)
-                {
-                    context.FireChannelRead(item);
-                }
-            }
-            else
-            {
-                context.FireChannelRead(message);
-                //base.ChannelRead(context, message);
+                message.Route = System.Text.Encoding.UTF8.GetString(byteBuffer.ReadeBytes(byteBuffer.ReaderIndex, routeLength));
             }
 
+            message.Data = byteBuffer.ReadeBytes();
+
+            output.Add(message);
         }
-        
     }
 }

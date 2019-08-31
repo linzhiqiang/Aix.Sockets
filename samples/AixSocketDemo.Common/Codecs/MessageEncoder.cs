@@ -1,4 +1,6 @@
-﻿using Aix.SocketCore.Channels;
+﻿using Aix.SocketCore.Buffers;
+using Aix.SocketCore.Channels;
+using Aix.SocketCore.Codecs;
 using Aix.SocketCore.Utils;
 using System;
 using System.Collections.Generic;
@@ -7,59 +9,35 @@ using System.Threading.Tasks;
 
 namespace AixSocketDemo.Common.Codecs
 {
-    public class MessageEncoder : ChannelHandlerAdapter
+   
+
+    public class MessageEncoder : MessageToByteEncoder<Message>
     {
-        public override Task WriteAsync(IChannelHandlerContext context, object message)
+        protected override void Encode(IChannelHandlerContext context, Message message, IByteBuffer output)
         {
-            Message msg = message as Message;
-            if (msg != null)
+            output.WriteByte(message.Reserved1);
+            output.WriteByte(message.Reserved2);
+            output.WriteByte(message.Reserved3);
+            output.WriteByte((byte)message.MessageType);
+
+            var bodyLength = 0;
+            output.WriteInt(bodyLength);
+            output.WriteInt(message.RequestId);
+
+            var routeDatas = System.Text.Encoding.UTF8.GetBytes(message.Route ?? string.Empty);
+            output.WriteInt(routeDatas.Length);
+            if (routeDatas.Length > 0)
             {
-                var data = Encode(msg);
-                return context.WriteAsync(data);
+                output.WriteBytes(routeDatas);
             }
-            else
+
+            if (message.Data != null && message.Data.Length > 0)
             {
-                return context.WriteAsync(message);
+                output.WriteBytes(message.Data);
             }
 
-            //return base.WriteAsync(context, message);
-        }
+            output.SetInt(4, output.ReadableBytes - 8);
 
-        public static byte[] Encode(Message msg)
-        {
-            var first4Bytes = new byte[4];
-            first4Bytes[0] = msg.Reserved1;
-            first4Bytes[1] = msg.Reserved2;
-            first4Bytes[2] = msg.Reserved3;
-            first4Bytes[3] = (byte)msg.MessageType;
-
-            var bodyLength = 0;//最后再赋值
-
-            var requestId = msg.RequestId;
-
-            var routeDatas = System.Text.Encoding.UTF8.GetBytes(msg.Route ?? string.Empty);
-
-            //8(固定header长度)+4(requestId长度)+4(routeDatas长度)+routeDatas.Length+msg.Data.Length
-            bodyLength = 4 + 4 + routeDatas.Length + msg.Data.Length;
-
-            var datas = new byte[bodyLength+8];
-
-            int offset = 0;
-            Write(first4Bytes, datas, ref offset);
-
-            Write(EncoderUtils.EncodeInt32(bodyLength), datas, ref offset);
-            Write(EncoderUtils.EncodeInt32(msg.RequestId), datas, ref offset);
-            Write(EncoderUtils.EncodeInt32(routeDatas.Length), datas, ref offset);
-            Write(routeDatas, datas, ref offset);
-            Write(msg.Data, datas, ref offset);
-
-            return datas;
-        }
-
-        private static void Write(byte[] source, byte[] dest, ref int destOffset)
-        {
-            System.Array.Copy(source, 0, dest, destOffset, source.Length);
-            destOffset += source.Length;
         }
     }
 }

@@ -54,8 +54,18 @@ namespace Aix.SocketCore.Buffers
 
         bool GetBoolean(int index);
 
+        /// <summary>
+        /// 按照大端读取 网络字节序
+        /// </summary>
+        /// <param name="index"></param>
+        /// <returns></returns>
         short GetShort(int index);
 
+        /// <summary>
+        /// 按照小段读取
+        /// </summary>
+        /// <param name="index"></param>
+        /// <returns></returns>
         short GetShortLE(int index);
 
         ushort GetUnsignedShort(int index);
@@ -102,6 +112,12 @@ namespace Aix.SocketCore.Buffers
 
         IByteBuffer SetByte(int index, int value);
 
+        /// <summary>
+        /// 按照大端写入 符合网络字节序
+        /// </summary>
+        /// <param name="index"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
         IByteBuffer SetShort(int index, int value);
 
         IByteBuffer SetShortLE(int index, int value);

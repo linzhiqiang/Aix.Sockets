@@ -2,6 +2,7 @@
 using Aix.SocketCore.Bootstrapping;
 using Aix.SocketCore.Channels;
 using Aix.SocketCore.Channels.Sockets;
+using Aix.SocketCore.Codecs;
 using Aix.SocketCore.Config;
 using Aix.SocketCore.DefaultHandlers;
 using Aix.SocketCore.EventLoop;
@@ -43,7 +44,11 @@ namespace AixSocketDemo.Server
                 })
                 .WorkerHandler(channel =>
                 {
+                    // channel.Pipeline.AddLast("MessageDecoder", new TestDecoder());
+                    channel.Pipeline.AddLast("MessageDecoder1", new LengthFieldBasedFrameDecoder(int.MaxValue,4,4));
                     channel.Pipeline.AddLast("MessageDecoder", new MessageDecoder());
+                    
+
                     channel.Pipeline.AddLast("MessageDecoder", new MessageEncoder());
                     channel.Pipeline.AddLast("IdleStateHandler", new IdleStateHandler(0, 0, 60+10));
                     channel.Pipeline.AddLast("ServerHeartbeatHandler", new ServerHeartbeatHandler());

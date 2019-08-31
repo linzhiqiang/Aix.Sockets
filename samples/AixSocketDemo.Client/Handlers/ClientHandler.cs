@@ -38,6 +38,7 @@ namespace AixSocketDemo.Client.Handlers
                 var data = msg.Data;
                 var str = Encoding.UTF8.GetString(data);
                 var count = Interlocked.Increment(ref Count);
+               // if(count % 10000==0 || count +10 >= 8000 * 10000)
                 Logger.LogInformation("接收数据：" + (count));
                 //Console.WriteLine(str);
             }
