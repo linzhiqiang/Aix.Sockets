@@ -9,6 +9,7 @@ namespace Aix.SocketCore.Config
     {
         public const string Backlog = "Backlog";
         public const string AutoRead = "AutoRead";
+        public const string HeartbeatIntervalSecond = "HeartbeatIntervalSecond";
     }
     public class ConfigContainer
     {
@@ -29,6 +30,11 @@ namespace Aix.SocketCore.Config
         public int Backlog { get { return ToInt(GetValue(ConfigConstant.Backlog), 10240); } }
 
         public bool AutoRead { get { return ToBool(GetValue(ConfigConstant.AutoRead), true); } }
+
+        /// <summary>
+        /// 心跳 单位秒 
+        /// </summary>
+        public int HeartbeatIntervalSecond{ get { return ToInt(GetValue(ConfigConstant.HeartbeatIntervalSecond), 0); } }
 
         private static object GetValue(string key)
         {

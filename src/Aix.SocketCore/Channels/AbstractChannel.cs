@@ -16,15 +16,31 @@ namespace Aix.SocketCore.Channels
 
         public IEventExecutor EventExecutor { get; protected set; }
 
+        volatile EndPoint localAddress;
+       
         public EndPoint LocalAddress
         {
-            get { return GetLocalAddress(); }
+            get
+            {
+                EndPoint address = this.localAddress;
+                return address ?? this.CacheLocalAddress();
+            }
         }
+        protected abstract EndPoint LocalAddressInternal { get; }
 
+
+        volatile EndPoint remoteAddress;
         public EndPoint RemoteAddress
         {
-            get { return GetRemoteAddress(); }
+            get
+            {
+                EndPoint address = this.remoteAddress;
+                return address ?? this.CacheRemoteAddress();
+            }
         }
+        protected abstract EndPoint RemoteAddressInternal { get; }
+
+
 
         public AbstractChannel(IChannel parent)
         {
@@ -69,8 +85,31 @@ namespace Aix.SocketCore.Channels
         }
         #endregion
 
-        protected abstract EndPoint GetLocalAddress();
+        protected EndPoint CacheLocalAddress()
+        {
+            try
+            {
+                return this.localAddress = this.LocalAddressInternal;
+            }
+            catch (Exception)
+            {
+                // Sometimes fails on a closed socket in Windows.
+                return null;
+            }
+        }
 
-        protected abstract EndPoint GetRemoteAddress();
+        protected EndPoint CacheRemoteAddress()
+        {
+            try
+            {
+                return this.remoteAddress = this.RemoteAddressInternal;
+            }
+            catch (Exception)
+            {
+                // Sometimes fails on a closed socket in Windows.
+                return null;
+            }
+        }
+     
     }
 }

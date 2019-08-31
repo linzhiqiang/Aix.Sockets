@@ -4,6 +4,7 @@ using AixSocketDemo.Common.Codecs;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Text;
 using System.Threading;
 
@@ -14,13 +15,17 @@ namespace AixSocketDemo.Client.Handlers
         static readonly ILogger Logger = InternalLoggerFactory.GetLogger<ClientHandler>();
         public override void ChannelActive(IChannelHandlerContext context)
         {
-            Logger.LogInformation("连接建立");
+            IPEndPoint remoteIp = context.Channel.RemoteAddress as IPEndPoint;
+            string ip = remoteIp.Address.MapToIPv4().ToString() + ":" + remoteIp.Port;
+            Logger.LogInformation($"连接建立：{ip}");
             base.ChannelActive(context);
         }
 
         public override void ChannelInactive(IChannelHandlerContext context)
         {
-            Logger.LogInformation("连接关闭");
+            IPEndPoint remoteIp = context.Channel.RemoteAddress as IPEndPoint;
+            string ip = remoteIp.Address.MapToIPv4().ToString() + ":" + remoteIp.Port;
+            Logger.LogInformation($"连接关闭：{ip}");
             base.ChannelInactive(context);
         }
         static int Count = 0;
@@ -50,7 +55,9 @@ namespace AixSocketDemo.Client.Handlers
 
         public override void ExceptionCaught(IChannelHandlerContext context, Exception exception)
         {
-            Console.WriteLine(exception);
+            IPEndPoint remoteIp = context.Channel.RemoteAddress as IPEndPoint;
+            string ip = remoteIp.Address.MapToIPv4().ToString() + ":" + remoteIp.Port;
+            Logger.LogError(exception, $"异常：{ip}");
             base.ExceptionCaught(context, exception);
         }
     }

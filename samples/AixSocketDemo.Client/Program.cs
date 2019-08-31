@@ -4,6 +4,7 @@ using Aix.SocketCore.Buffers;
 using Aix.SocketCore.Channels;
 using Aix.SocketCore.Channels.Sockets;
 using Aix.SocketCore.Codecs;
+using Aix.SocketCore.Config;
 using Aix.SocketCore.DefaultHandlers;
 using Aix.SocketCore.EventLoop;
 using Aix.SocketCore.Utils;
@@ -38,6 +39,7 @@ namespace AixSocketDemo.Client
             var bootstrap = new ClientBootstrap();
             bootstrap
                 .Group(workerGroup)
+                .Config(ConfigConstant.HeartbeatIntervalSecond, 60)
                 .Channel<TcpSocketChannel>()
                 .WorkerHandler(channel =>
                 {
@@ -54,12 +56,12 @@ namespace AixSocketDemo.Client
 			//ip="192.168.111.133";
             int port = 8007;
 
-            for (int i = 0; i < 8; i++)
+            for (int i = 0; i < 16; i++)
             {
                 Task.Run(async () =>
                 {
                     var client = await bootstrap.ConnectAsync(new IPEndPoint(IPAddress.Parse(ip), port));
-                    await Test(1000, client);
+                    await Test(100000, client);
                 });
 
                // await Task.Delay(10);
@@ -72,7 +74,7 @@ namespace AixSocketDemo.Client
             for (int i = 0; i < count; i++)
             {
                 Message message = new Message() { MessageType = MessageType.Request };
-                message.Data = Encoding.UTF8.GetBytes(i + GetLargeMsg(100));
+                message.Data = Encoding.UTF8.GetBytes(i + GetLargeMsg(10000));
                 await client.WriteAsync(message);
                 await Task.Delay(1);
             }

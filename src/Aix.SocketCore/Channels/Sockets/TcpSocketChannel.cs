@@ -41,6 +41,9 @@ namespace Aix.SocketCore.Channels.Sockets
         {
             Socket = socket;
             this.Open = connected;
+
+            this.CacheLocalAddress();
+            this.CacheRemoteAddress();
             try
             {
                 this.Socket.Blocking = false;
@@ -60,15 +63,9 @@ namespace Aix.SocketCore.Channels.Sockets
             }
         }
 
-        protected override EndPoint GetLocalAddress()
-        {
-            return this.Socket.LocalEndPoint;
-        }
+        protected override EndPoint LocalAddressInternal => this.Socket.LocalEndPoint;
 
-        protected override EndPoint GetRemoteAddress()
-        {
-            return this.Socket.RemoteEndPoint;
-        }
+        protected override EndPoint RemoteAddressInternal => this.Socket.RemoteEndPoint;
 
         #region IChannelUnsafe
 
@@ -135,10 +132,22 @@ namespace Aix.SocketCore.Channels.Sockets
         {
             if (this.Open)
             {
-                this.Open = false;
-                this.Socket.Shutdown(SocketShutdown.Both);
-                this.Socket.Dispose();
-                this.Pipeline.FireChannelInactive();
+                try
+                {
+                    this.Open = false;
+                    this.Socket.Shutdown(SocketShutdown.Both);
+                    this.Socket.Dispose();
+                    if (ReceiveEventArgs != null)
+                    {
+                        ReceiveEventArgs.Dispose();
+                        ReceiveEventArgs = null;
+                    }
+                }
+                finally
+                {
+                    this.Pipeline.FireChannelInactive();
+                }
+
             }
             return Task.CompletedTask;
         }

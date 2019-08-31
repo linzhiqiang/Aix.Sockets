@@ -37,6 +37,7 @@ namespace AixSocketDemo.Server
             bootstrap
                 .Group(bossGroup, workerGroup)
                 .Config(ConfigConstant.Backlog,10240)
+                .Config(ConfigConstant.HeartbeatIntervalSecond,60)
                 .Channel<TcpServerSocketChannel>()
                 .BossHandler(channel =>
                 {
@@ -50,7 +51,7 @@ namespace AixSocketDemo.Server
                     
 
                     channel.Pipeline.AddLast("MessageDecoder", new MessageEncoder());
-                    channel.Pipeline.AddLast("IdleStateHandler", new IdleStateHandler(0, 0, 60+10));
+                    channel.Pipeline.AddLast("IdleStateHandler", new IdleStateHandler(0, 0, 60+5));
                     channel.Pipeline.AddLast("ServerHeartbeatHandler", new ServerHeartbeatHandler());
                     channel.Pipeline.AddLast("ServerHandler", new ServerHandler());
                     

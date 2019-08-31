@@ -34,6 +34,8 @@ namespace Aix.SocketCore.Channels.Sockets
         {
             this.Socket = socket;
             this.Open = true;
+            this.CacheLocalAddress();
+            this.CacheRemoteAddress();
             try
             {
                 this.Socket.Blocking = false;
@@ -53,16 +55,9 @@ namespace Aix.SocketCore.Channels.Sockets
             }
         }
 
-        protected override EndPoint GetLocalAddress()
-        {
-            return this.Socket.LocalEndPoint;
-        }
+        protected override EndPoint LocalAddressInternal => this.Socket.LocalEndPoint;
 
-        protected override EndPoint GetRemoteAddress()
-        {
-            return null;
-        }
-
+        protected override EndPoint RemoteAddressInternal => this.Socket.RemoteEndPoint;
 
         #region IChannelUnsafe
 
@@ -103,9 +98,21 @@ namespace Aix.SocketCore.Channels.Sockets
         {
             if (this.Open)
             {
-                this.Open = false;
-                this.Socket.Dispose();
-                this.Pipeline.FireChannelInactive();
+                try
+                {
+                    this.Open = false;
+                    this.Socket.Dispose();
+
+                    if (AcceptEventArg != null)
+                    {
+                        AcceptEventArg.Dispose();
+                        AcceptEventArg = null;
+                    }
+                }
+                finally
+                {
+                    this.Pipeline.FireChannelInactive();
+                }
             }
             return Task.CompletedTask;
         }
@@ -114,7 +121,7 @@ namespace Aix.SocketCore.Channels.Sockets
         {
             throw new NotSupportedException();
         }
-
+        SocketChannelAsyncOperation AcceptEventArg;
         /// <summary>
         /// 开始读取  （开始接收连接或开始接收数据）
         /// </summary>
@@ -126,9 +133,9 @@ namespace Aix.SocketCore.Channels.Sockets
             if (IsBeginRead == true) return this;
             IsBeginRead = true;
 
-            var acceptEventArg = new SocketChannelAsyncOperation(this);
-            acceptEventArg.Completed += AceptOperation_Completed;
-            StartAccept(acceptEventArg);
+            AcceptEventArg = new SocketChannelAsyncOperation(this);
+            AcceptEventArg.Completed += AceptOperation_Completed;
+            StartAccept(AcceptEventArg);
 
             return this;
         }
