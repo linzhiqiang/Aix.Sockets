@@ -9,6 +9,7 @@ using Aix.SocketCore.EventLoop;
 using AixSocket.Logging;
 using AixSocketDemo.Client.Handlers;
 using AixSocketDemo.Common.Codecs;
+using AixSocketDemo.Common.Invokes;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
@@ -24,9 +25,12 @@ namespace AixSocketDemo.Client
     {
         private ILoggerFactory _loggerFactory;
 
+        private ILogger<StartHostService> _logger;
+
         public StartHostService(ILoggerFactory loggerFactory)
         {
             _loggerFactory = loggerFactory;
+            _logger=_loggerFactory.CreateLogger<StartHostService>();
         }
         public Task StartAsync(CancellationToken cancellationToken)
         {
@@ -75,22 +79,41 @@ namespace AixSocketDemo.Client
                 Task.Run(async () =>
                 {
                     var client = await bootstrap.ConnectAsync(new IPEndPoint(IPAddress.Parse(ip), port));
-                    await Test(1000*10000, client);
+                    await Test(100*10000, client);
                 });
 
                 // await Task.Delay(10);
             }
 
         }
-
+        static int Count = 0;
         private async Task Test(int count, IChannel client)
         {
             for (int i = 0; i < count; i++)
             {
-                Message message = new Message() { MessageType = MessageType.Request };
+                Message message = new Message() {
+                    MessageType = MessageType.Request,
+                    RequestId = RequestIdGenerator.Instance.GetNewRequestId()
+                };
                 message.Data = Encoding.UTF8.GetBytes(i + GetLargeMsg(1000));
+
+                var tcs = ResponseManage.Instance.RegisterRequest(message.RequestId, 5000);
                 await client.WriteAsync(message);
-                await Task.Delay(1);
+
+                Message messageRes = null;
+                try
+                {
+                    messageRes = await tcs.Task;
+                    var str = Encoding.UTF8.GetString(messageRes.Data);
+                    var countIndex = Interlocked.Increment(ref Count);
+                    _logger.LogInformation("接收数据：" + (countIndex));
+                }
+                catch (TimeoutException ex)
+                {
+                    //记录log
+                    _logger.LogError($"{message.RequestId}请求超时，{ex.Message}");
+                    throw ex;
+                }
             }
             GC.Collect();
         }

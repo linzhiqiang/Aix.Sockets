@@ -1,6 +1,7 @@
 ﻿using Aix.SocketCore.Channels;
 using AixSocket.Logging;
 using AixSocketDemo.Common.Codecs;
+using AixSocketDemo.Common.Invokes;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -40,12 +41,15 @@ namespace AixSocketDemo.Client.Handlers
 
             if (msg.MessageType == MessageType.Response)
             {
+                ResponseManage.Instance.SetResult(msg.RequestId, msg);
+                /*
                 var data = msg.Data;
                 var str = Encoding.UTF8.GetString(data);
                 var count = Interlocked.Increment(ref Count);
                // if(count % 10000==0 || count +10 >= 8000 * 10000)
                 Logger.LogInformation("接收数据：" + (count));
                 //Console.WriteLine(str);
+                */
             }
             else
             {
