@@ -5,6 +5,9 @@ using System.Threading.Tasks;
 
 namespace Aix.SocketCore.EventLoop
 {
+    /// <summary>
+    /// task任务都转到IEventExecutor中执行，保证在一个线程中执行
+    /// </summary>
     public sealed class ExecutorTaskScheduler : TaskScheduler
     {
         readonly IEventExecutor executor;
