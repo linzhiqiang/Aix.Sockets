@@ -9,4 +9,18 @@ namespace Aix.SocketCore.EventLoop
     {
         void Run();
     }
+
+    public class ActionRunnable : IRunnable
+    {
+        Action _action;
+        public ActionRunnable(Action action)
+        {
+            _action = action;
+
+        }
+        public void Run()
+        {
+            _action();
+        }
+    }
 }

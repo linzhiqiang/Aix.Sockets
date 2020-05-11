@@ -446,6 +446,12 @@ namespace Aix.SocketCore.Channels
             {
                 //executor.Execute((p, func) => ((Func<Task>)func)().LinkOutcome((TaskCompletionSource)p), promise, function);
                 executor.Execute(() => function().LinkOutcome(promise));
+
+                executor.Execute(() =>
+                {
+                    var task = function();
+                    task.LinkOutcome(promise);
+                });
             }
             catch (Exception cause)
             {
