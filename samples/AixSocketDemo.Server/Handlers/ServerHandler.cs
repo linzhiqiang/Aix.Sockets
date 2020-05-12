@@ -13,6 +13,13 @@ using System.Threading.Tasks;
 
 namespace AixSocketDemo.Server.Handlers
 {
+
+    /*
+     *context 是触发下一个（管道的下一个）
+     * pipeline是从头触发
+     * channel也是从头触发的（内部调用pipeline触发）
+     */
+
     public class ServerHandler : ChannelHandlerAdapter
     {
         static readonly ILogger Logger = InternalLoggerFactory.GetLogger<ServerHandler>();
@@ -43,19 +50,39 @@ namespace AixSocketDemo.Server.Handlers
 
             if (msg.MessageType == MessageType.Request || msg.MessageType == MessageType.Notify)
             {
-                var data = msg.Data;
-                var str = Encoding.UTF8.GetString(data);
-                // Console.WriteLine(str);
-                var count = Interlocked.Increment(ref Count);
-                //Console.WriteLine("接收数据：" + (count));
-                Logger.LogInformation("接收数据：" + count);
+                //var data = msg.Data;
+                //var str = Encoding.UTF8.GetString(data);
+                //// Console.WriteLine(str);
+                //var count = Interlocked.Increment(ref Count);
+                ////Console.WriteLine("接收数据：" + (count));
+                //Logger.LogInformation("接收数据：" + count);
 
-                msg.MessageType = MessageType.Response;
-                context.Channel.WriteAsync(message).Wait();
+                //msg.MessageType = MessageType.Response;
+                //context.Channel.WriteAsync(message).Wait();
+                Task.Run(async () =>
+                {
+                    await BusinessProcess(context, msg);
+                });
+
             }
             else
             {
                 context.FireChannelRead(message);
+            }
+        }
+
+        private async Task BusinessProcess(IChannelHandlerContext context, Message msg)
+        {
+            var data = msg.Data;
+            var str = Encoding.UTF8.GetString(data);
+            var count = Interlocked.Increment(ref Count);
+            Logger.LogInformation("接收数据：" + count);
+
+            //返回结果
+            if (msg.MessageType == MessageType.Request)
+            {
+                msg.MessageType = MessageType.Response;
+                await context.Channel.WriteAsync(msg);
             }
         }
 

@@ -69,6 +69,8 @@ namespace Aix.SocketCore.Channels
         }
 
         #region 基本功能
+
+        #region Add
         public IChannelPipeline AddFirst(string name, IChannelHandler handler)
         {
             var newNode = new ChannelHandlerContext(this, name, handler);
@@ -80,6 +82,7 @@ namespace Aix.SocketCore.Channels
             next.Prev = newNode;
             this.Head.Next = newNode;
 
+            CallHandlerAdded0(newNode);
             return this;
         }
 
@@ -93,7 +96,7 @@ namespace Aix.SocketCore.Channels
 
             prev.Next = newNode;
             this.Tail.Prev = newNode;
-
+            CallHandlerAdded0(newNode);
             return this;
         }
 
@@ -111,7 +114,7 @@ namespace Aix.SocketCore.Channels
 
             current.Prev = newNode;
             if (prev != null) prev.Next = newNode;
-
+            CallHandlerAdded0(newNode);
             return this;
         }
         public IChannelPipeline AddAfter(string baseName, string name, IChannelHandler handler)
@@ -129,9 +132,14 @@ namespace Aix.SocketCore.Channels
             current.Next = newNode;
             if (next != null) next.Prev = newNode;
 
+            CallHandlerAdded0(newNode);
             return this;
         }
 
+        #endregion
+
+
+        #region Remove
         public IChannelPipeline Remove(IChannelHandler handler)
         {
             Remove0(GetContextByHandler(handler));
@@ -152,6 +160,7 @@ namespace Aix.SocketCore.Channels
             Remove0(context);
             return context != null ? (T)context.Handler : default(T);
         }
+        #endregion
 
         #endregion
 
@@ -235,6 +244,12 @@ namespace Aix.SocketCore.Channels
 
         #region      private 
 
+        void CallHandlerAdded0(IChannelHandlerContext context)
+        {
+            context.Handler.HandlerAdded(context);
+            //这里可以调用context.SetAdded();//设置状态
+        }
+
         private void Remove0(IChannelHandlerContext context)
         {
             if (context == null) return;
@@ -251,6 +266,9 @@ namespace Aix.SocketCore.Channels
             {
                 next.Prev = prev;
             }
+
+            context.Handler.HandlerRemoved(context);
+            //这里可以调用context.SetRemoveed();//设置状态
         }
 
         private IChannelHandlerContext GetContextByName(string name)

@@ -4,6 +4,7 @@ using Aix.SocketCore.Utils;
 using System;
 using System.Net;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Aix.SocketCore.Channels
@@ -18,6 +19,8 @@ namespace Aix.SocketCore.Channels
         IChannelHandlerContext Next { get; set; }
 
         IChannelHandlerContext Prev { get; set; }
+
+        //bool Added { get; }
 
         #region 入站
         IChannelHandlerContext FireChannelActive();
@@ -65,6 +68,10 @@ namespace Aix.SocketCore.Channels
         private IChannelPipeline Pipeline { get; }
 
         IEventExecutor EventExecutor => Channel.EventExecutor;
+
+
+        public bool Removed => throw new NotImplementedException();
+
         public ChannelHandlerContext(IChannelPipeline pipeline, string name, IChannelHandler handler)
         {
             this.Pipeline = pipeline;
@@ -446,12 +453,6 @@ namespace Aix.SocketCore.Channels
             {
                 //executor.Execute((p, func) => ((Func<Task>)func)().LinkOutcome((TaskCompletionSource)p), promise, function);
                 executor.Execute(() => function().LinkOutcome(promise));
-
-                executor.Execute(() =>
-                {
-                    var task = function();
-                    task.LinkOutcome(promise);
-                });
             }
             catch (Exception cause)
             {

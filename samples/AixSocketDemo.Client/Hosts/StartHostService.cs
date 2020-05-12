@@ -62,24 +62,26 @@ namespace AixSocketDemo.Client
                 .WorkerHandler(channel =>
                 {
                     //channel.Pipeline.AddLast("MessageDecoder", new MessageDecoder());
-                    channel.Pipeline.AddLast("MessageDecoder1", new LengthFieldBasedFrameDecoder(int.MaxValue, 4, 4));
+                    channel.Pipeline.AddLast("MessageBaseDecoder", new LengthFieldBasedFrameDecoder(int.MaxValue, 4, 4));
                     channel.Pipeline.AddLast("MessageDecoder", new MessageDecoder());
 
-                    channel.Pipeline.AddLast("MessageDecoder", new MessageEncoder());
+                    channel.Pipeline.AddLast("MessageEncoder", new MessageEncoder());
                     channel.Pipeline.AddLast("IdleStateHandler", new IdleStateHandler(0, 0, 60));
                     channel.Pipeline.AddLast("ClientHeartbeatHandler", new ClientHeartbeatHandler());
                     channel.Pipeline.AddLast("ServerHandler", new ClientHandler());
+
+                    //便于理解 这里都是addlist 入站是从上外下执行的，出站是从下往上执行的
                 });
             var ip = "127.0.0.1";
             //ip="192.168.111.133";
             int port = 8007;
 
-            for (int i = 0; i < 8; i++)
+            for (int i = 0; i < 4; i++)
             {
                 Task.Run(async () =>
                 {
                     var client = await bootstrap.ConnectAsync(new IPEndPoint(IPAddress.Parse(ip), port));
-                    await Test(100*10000, client);
+                    await Test(3, client);
                 });
 
                 // await Task.Delay(10);
@@ -95,6 +97,7 @@ namespace AixSocketDemo.Client
                     MessageType = MessageType.Request,
                     RequestId = RequestIdGenerator.Instance.GetNewRequestId()
                 };
+                if (i == 0) message.MessageType = MessageType.Auth;
                 message.Data = Encoding.UTF8.GetBytes(i + GetLargeMsg(1000));
 
                 var tcs = ResponseManage.Instance.RegisterRequest(message.RequestId, 5000);
@@ -106,7 +109,7 @@ namespace AixSocketDemo.Client
                     messageRes = await tcs.Task;
                     var str = Encoding.UTF8.GetString(messageRes.Data);
                     var countIndex = Interlocked.Increment(ref Count);
-                    _logger.LogInformation("接收数据：" + (countIndex));
+                    _logger.LogInformation("接收数据：" + (countIndex)+ str);
                 }
                 catch (TimeoutException ex)
                 {
