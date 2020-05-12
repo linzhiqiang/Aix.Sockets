@@ -7,6 +7,18 @@ namespace Aix.SocketCore.Channels
     public class ChannelHandlerAdapter : IChannelHandler
     {
         [Skip]
+        public virtual void HandlerAdded(IChannelHandlerContext context)
+        {
+            //这里没有管道执行，哪个ChannelHandlerAdapter中删除就在该ChannelHandlerAdapter中执行该事件
+        }
+
+        [Skip]
+        public virtual void HandlerRemoved(IChannelHandlerContext context)
+        {
+            //这里没有管道执行，哪个ChannelHandlerAdapter中删除就在该ChannelHandlerAdapter中执行该事件
+        }
+
+        [Skip]
         public virtual void ChannelActive(IChannelHandlerContext context)
         {
             context.FireChannelActive();
@@ -81,6 +93,7 @@ namespace Aix.SocketCore.Channels
         {
             context.Read();
         }
+
 
     }
 }

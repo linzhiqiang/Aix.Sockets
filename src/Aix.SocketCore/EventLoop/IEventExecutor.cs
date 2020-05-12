@@ -31,41 +31,8 @@ namespace Aix.SocketCore.EventLoop
 
     }
 
-    public class ActionRunnable : IRunnable
-    {
-        Action _action;
-        public ActionRunnable(Action action)
-        {
-            _action = action;
-
-        }
-        public void Run()
-        {
-            _action();
-        }
-    }
+   
 
 
-    public  class ScheduledRunnable : IScheduledRunnable
-    {
-        public long TimeStamp { get; }
-        IRunnable _action;
-
-        public ScheduledRunnable(IRunnable runnable, long timeStamp)
-        {
-            _action = runnable;
-            TimeStamp = timeStamp;
-        }
-
-        public int CompareTo(IScheduledRunnable other)
-        {
-            return (int)(this.TimeStamp - other.TimeStamp);
-        }
-
-        public void  Run()
-        {
-             _action.Run();
-        }
-
-    }
+    
 }

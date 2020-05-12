@@ -68,21 +68,23 @@ namespace AixSocketDemo.Server
                 .WorkerHandler(channel =>
                 {
                     // channel.Pipeline.AddLast("MessageDecoder", new TestDecoder());
-                    channel.Pipeline.AddLast("MessageDecoder1", new LengthFieldBasedFrameDecoder(int.MaxValue, 4, 4));
+                    channel.Pipeline.AddLast("MessageBaseDecoder", new LengthFieldBasedFrameDecoder(int.MaxValue, 4, 4));
                     channel.Pipeline.AddLast("MessageDecoder", new MessageDecoder());
 
 
-                    channel.Pipeline.AddLast("MessageDecoder", new MessageEncoder());
+                    channel.Pipeline.AddLast("MessageEncoder", new MessageEncoder());
                     channel.Pipeline.AddLast("IdleStateHandler", new IdleStateHandler(0, 0, 60 + 5));
                     channel.Pipeline.AddLast("ServerHeartbeatHandler", new ServerHeartbeatHandler());
+                    channel.Pipeline.AddLast("AuthHandler", new AuthHandler());
                     channel.Pipeline.AddLast("ServerHandler", new ServerHandler());
 
                 });
             var ip = "127.0.0.1";
             //ip = "192.168.111.133";
             int port = 8007;
+            Console.WriteLine(DateTime.Now.ToString("HH:mm:ss"));
             ServerChannel = await bootstrap.BindAsync(new IPEndPoint(IPAddress.Parse(ip), port));
-
+            Console.WriteLine(DateTime.Now.ToString("HH:mm:ss"));
             //IChannel serverChannel = new TcpServerSocketChannel();
 
             ////初始化handler

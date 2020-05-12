@@ -9,7 +9,8 @@ namespace Aix.SocketCore.EventLoop
     public class MultithreadEventLoopGroup //: IEventExecutor
     {
         static readonly int DefaultEventLoopThreadCount = Environment.ProcessorCount * 2;
-        readonly SingleThreadEventExecutor[] EventLoops;
+        readonly IEventExecutor[] EventLoops;
+        Func<IEventExecutor> EventExecutorFactory = () => new SingleThreadEventExecutor();
         int requestId;
 
         public MultithreadEventLoopGroup() : this(DefaultEventLoopThreadCount)
@@ -18,10 +19,10 @@ namespace Aix.SocketCore.EventLoop
         }
         public MultithreadEventLoopGroup(int threadCount)
         {
-            this.EventLoops = new SingleThreadEventExecutor[threadCount];
+            this.EventLoops = new IEventExecutor[threadCount];
             for (int i = 0; i < threadCount; i++)
             {
-                var eventLoop = new SingleThreadEventExecutor();
+                var eventLoop = EventExecutorFactory();
                 this.EventLoops[i] = eventLoop;
                 eventLoop.OnException += EventLoop_OnException;
             }

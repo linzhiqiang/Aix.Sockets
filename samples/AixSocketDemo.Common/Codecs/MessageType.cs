@@ -26,9 +26,9 @@ namespace AixSocketDemo.Common.Codecs
         Auth = 4,//认证
         AuthRes = 5,//认证响应
 
-        Request = 11,
-        Notify = 12,
-        Response = 13,
-        Push = 14
+        Request = 11, //客户端请求 需要服务端响应的
+        Notify = 12,//客户端请求，不需要服务端响应
+        Response = 13,//服务端响应的
+        Push = 14// 服务端主动推送消息给客户端的
     }
 }

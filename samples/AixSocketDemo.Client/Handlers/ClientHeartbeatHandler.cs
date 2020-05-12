@@ -47,7 +47,7 @@ namespace AixSocketDemo.Client.Handlers
             if (idleStateEvent.State == IdleState.AllIdle)
             {
                 Logger.LogInformation($"客户端空闲超时发送心跳：{DateTime.Now.ToString("HH:mm:ss")}");
-                context.WriteAsync(HeartbeatMessage);
+                context.WriteAsync(HeartbeatMessage); //空闲到了就发送，如果连接不在，会触发关闭连接的
             }
             else if (idleStateEvent.State == IdleState.ReaderIdle)
             {

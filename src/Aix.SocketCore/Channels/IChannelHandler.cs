@@ -9,8 +9,14 @@ namespace Aix.SocketCore.Channels
     {
 
     }
+
     public interface IChannelHandler
     {
+
+        void HandlerAdded(IChannelHandlerContext context);
+
+        void HandlerRemoved(IChannelHandlerContext context);
+
         #region 入站
         void ChannelActive(IChannelHandlerContext context);
 
