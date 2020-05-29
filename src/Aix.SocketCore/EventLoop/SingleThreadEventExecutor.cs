@@ -23,7 +23,7 @@ namespace Aix.SocketCore.EventLoop
         public SingleThreadEventExecutor()
         {
             //_taskQueue = new BlockingCollection<IRunnable>(new ConcurrentQueue<IRunnable>());
-            _taskQueue = new ConcurrentQueue<IRunnable>();
+            _taskQueue = new ConcurrentQueue<IRunnable>(); 
             this._scheduler = new ExecutorTaskScheduler(this);
             _myThread = new MyThread(loop);
         }
