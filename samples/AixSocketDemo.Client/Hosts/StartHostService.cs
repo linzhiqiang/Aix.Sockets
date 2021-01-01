@@ -76,12 +76,21 @@ namespace AixSocketDemo.Client
             //ip="192.168.111.133";
             int port = 8007;
 
-            for (int i = 0; i < 4; i++)
+            for (int i = 0; i < 1; i++)
             {
                 Task.Run(async () =>
                 {
-                    var client = await bootstrap.ConnectAsync(new IPEndPoint(IPAddress.Parse(ip), port));
-                    await Test(3, client);
+                    IChannel client=null;
+                    try
+                    {
+                        client = await bootstrap.ConnectAsync(new IPEndPoint(IPAddress.Parse(ip), port));
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine("**********"+ex.Message);
+                    }
+                    
+                   if(client!=null) await Test(3, client);
                 });
 
                 // await Task.Delay(10);

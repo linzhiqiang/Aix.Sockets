@@ -2,6 +2,9 @@
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Threading.Tasks;
+using Aix.SocketCore.Utils;
+using Aix.SocketCore.Foundation;
 
 namespace AixSocketDemo.Client
 {
@@ -9,6 +12,9 @@ namespace AixSocketDemo.Client
     {
         static void Main(string[] args)
         {
+            //Test();
+            //Console.Read();
+
             var host = new HostBuilder()
                    .ConfigureHostConfiguration(builder =>
                    {
@@ -30,6 +36,44 @@ namespace AixSocketDemo.Client
             Console.WriteLine("服务已退出");
         }
 
-        
+        private static void Test()
+        {
+            Task.Run(async()=> {
+                try
+                {
+                    await SafeExecuteOutboundAsync(taskMethod);
+                }
+                catch (Exception ex)
+                { 
+                
+                }
+            });
+        }
+
+        private static Task taskMethod()
+        {
+            return Task.Run(()=> {
+                throw new Exception("error");
+                Console.WriteLine("async taskMethod");
+            });
+        }
+
+        static Task SafeExecuteOutboundAsync(Func<Task> function)
+        {
+            var promise = new TaskCompletionSource();
+            try
+            {
+                //executor.Execute((p, func) => ((Func<Task>)func)().LinkOutcome((TaskCompletionSource)p), promise, function);
+                Task.Run(async()=> {
+                    await Task.Delay(TimeSpan.FromSeconds(5));
+                    function().LinkOutcome(promise);
+                });
+            }
+            catch (Exception cause)
+            {
+                promise.TrySetException(cause);
+            }
+            return promise.Task;
+        }
     }
 }

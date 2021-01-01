@@ -304,15 +304,7 @@ namespace Aix.SocketCore.Channels
 
         async Task InvokeConnectAsync(EndPoint remoteAddress)
         {
-            try
-            {
-                await this.Handler.ConnectAsync(this, remoteAddress);
-            }
-            catch (Exception ex)
-            {
-                this.NotifyHandlerException(ex);
-            }
-
+            await this.Handler.ConnectAsync(this, remoteAddress);
         }
 
         public Task DisconnectAsync()

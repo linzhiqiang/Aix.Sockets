@@ -65,7 +65,11 @@ namespace Aix.SocketCore.Channels.Sockets
 
         protected override EndPoint LocalAddressInternal => this.Socket.LocalEndPoint;
 
-        protected override EndPoint RemoteAddressInternal => this.Socket.RemoteEndPoint;
+        protected override EndPoint RemoteAddressInternal => CurrentRemoteEndPoint;//this.Socket.RemoteEndPoint;
+
+        private EndPoint CurrentRemoteEndPoint;
+
+        private TaskCompletionSource ConnectPromise;
 
         #region IChannelUnsafe
 
@@ -86,40 +90,58 @@ namespace Aix.SocketCore.Channels.Sockets
             throw new NotSupportedException();
         }
 
-        public Task UnsafeConnectAsync(EndPoint remoteAddress)
+        public async Task UnsafeConnectAsync(EndPoint remoteAddress)
         {
-            if (Open) return Task.CompletedTask;
+            if (Open) return;
 
-            bool success = false;
-            try
+            if (ConnectPromise != null)
             {
-                var connectEventArgs = new SocketChannelAsyncOperation(this);
-                connectEventArgs.RemoteEndPoint = remoteAddress;
-                connectEventArgs.Completed += IO_Completed;
-                bool connected = !this.Socket.ConnectAsync(connectEventArgs);
-                if (connected)
-                {
-                    ConnectFinish(connectEventArgs);
-                }
-                //Open = true;
-                success = true;
-            }
-            finally
-            {
-                if (!success)
-                {
-                    this.UnsafeCloseAsync();
-                }
-
+                throw new InvalidOperationException("connection attempt already made");
             }
 
-            return Task.CompletedTask;
+            CurrentRemoteEndPoint = remoteAddress;
+            var connectEventArgs = new SocketChannelAsyncOperation(this);
+            connectEventArgs.RemoteEndPoint = remoteAddress;
+            connectEventArgs.Completed += IO_Completed;
+            bool connected = !this.Socket.ConnectAsync(connectEventArgs);
+            if (connected)
+            {
+                ConnectFinish(connectEventArgs);
+            }
+            else
+            {
+                ConnectPromise = new TaskCompletionSource(remoteAddress);
+                //这里做个超时处理
+                try
+                {
+                    await ConnectPromise.Task.TimeoutAfter(TimeSpan.FromSeconds(10));
+                }
+                catch (TimeoutException)
+                {
+                    ConnectPromise.SetException(new TimeoutException("连接超时"));
+                }
+                await ConnectPromise.Task;
+            }
+
+
         }
 
         private void ConnectFinish(SocketAsyncEventArgs e)
         {
-            Open = true;
-            this.Pipeline.FireChannelActive();
+            TaskCompletionSource promise = this.ConnectPromise;
+            if (e.SocketError == SocketError.Success)
+            {
+                Open = true;
+                this.Pipeline.FireChannelActive();
+                promise.TryComplete();
+            }
+            else
+            {
+                this.UnsafeCloseAsync();
+                this.Pipeline.FireExceptionCaught(new SocketException((int)e.SocketError));
+                promise.TrySetException(new SocketException((int)e.SocketError));
+            }
+
             e.Dispose();
         }
 
@@ -173,15 +195,15 @@ namespace Aix.SocketCore.Channels.Sockets
                     Logger.LogError($"Send SocketError:{errorCode}");
                     throw new SocketException((int)errorCode);
                 }
-                //if (errorCode != SocketError.Success && errorCode != SocketError.WouldBlock)
-                //{
-                //    throw new SocketException((int)errorCode);
-                //}
-                //if (errorCode == SocketError.WouldBlock)
-                //{
-                //    throw new SocketException((int)errorCode);
-                //}
-                return false;
+            //if (errorCode != SocketError.Success && errorCode != SocketError.WouldBlock)
+            //{
+            //    throw new SocketException((int)errorCode);
+            //}
+            //if (errorCode == SocketError.WouldBlock)
+            //{
+            //    throw new SocketException((int)errorCode);
+            //}
+            return false;
             });
 
         }
