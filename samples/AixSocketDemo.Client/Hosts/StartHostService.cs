@@ -30,7 +30,7 @@ namespace AixSocketDemo.Client
         public StartHostService(ILoggerFactory loggerFactory)
         {
             _loggerFactory = loggerFactory;
-            _logger=_loggerFactory.CreateLogger<StartHostService>();
+            _logger = _loggerFactory.CreateLogger<StartHostService>();
         }
         public Task StartAsync(CancellationToken cancellationToken)
         {
@@ -58,6 +58,7 @@ namespace AixSocketDemo.Client
             bootstrap
                 .Group(workerGroup)
                 .Config(ConfigConstant.HeartbeatIntervalSecond, 60)
+                .Config(ConfigConstant.ConnectTimeoutSecond, 10)
                 .Channel<TcpSocketChannel>()
                 .WorkerHandler(channel =>
                 {
@@ -72,42 +73,60 @@ namespace AixSocketDemo.Client
 
                     //便于理解 这里都是addlist 入站是从上外下执行的，出站是从下往上执行的
                 });
-            var ip = "127.0.0.1";
+
+            await Test(bootstrap);
+
+        }
+
+        string ip = "127.0.0.1";
+        int port = 8007;
+        private async Task Test(ClientBootstrap bootstrap)
+        {
+           // var ip = "127.0.0.1";
             //ip="192.168.111.133";
-            int port = 8007;
+           // int port = 8007;
 
             for (int i = 0; i < 1; i++)
             {
                 Task.Run(async () =>
                 {
-                    IChannel client=null;
-                    try
+                    //IChannel client = null;
+                    //try
+                    //{
+                    //    client = await bootstrap.ConnectAsync(new IPEndPoint(IPAddress.Parse(ip), port));
+                    //}
+                    //catch (Exception ex)
+                    //{
+                    //    Console.WriteLine("**********" + ex.Message);
+                    //}
+
+                    //if (client != null) await Test(100, client);
+                    var client = await bootstrap.ConnectAsync(new IPEndPoint(IPAddress.Parse(ip), port));
+                    for (int i = 0; i < 100000; i++)
                     {
-                        client = await bootstrap.ConnectAsync(new IPEndPoint(IPAddress.Parse(ip), port));
+                       
+                        await Test(1, client);
                     }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine("**********"+ex.Message);
-                    }
-                    
-                   if(client!=null) await Test(3, client);
                 });
 
                 // await Task.Delay(10);
             }
-
         }
+
+        
+
         static int Count = 0;
         private async Task Test(int count, IChannel client)
         {
             for (int i = 0; i < count; i++)
             {
-                Message message = new Message() {
+                Message message = new Message()
+                {
                     MessageType = MessageType.Request,
                     RequestId = RequestIdGenerator.Instance.GetNewRequestId()
                 };
-                if (i == 0) message.MessageType = MessageType.Auth;
-                message.Data = Encoding.UTF8.GetBytes(i + GetLargeMsg(1000));
+                //if (i == 0) message.MessageType = MessageType.Auth;
+                message.Data = Encoding.UTF8.GetBytes(i + GetLargeMsg(100));
 
                 var tcs = ResponseManage.Instance.RegisterRequest(message.RequestId, 5000);
                 await client.WriteAsync(message);
@@ -118,7 +137,7 @@ namespace AixSocketDemo.Client
                     messageRes = await tcs.Task;
                     var str = Encoding.UTF8.GetString(messageRes.Data);
                     var countIndex = Interlocked.Increment(ref Count);
-                    _logger.LogInformation("接收数据：" + (countIndex)+ str);
+                    _logger.LogInformation("接收数据：" + (countIndex) + "***********" + str);
                 }
                 catch (TimeoutException ex)
                 {
@@ -126,8 +145,12 @@ namespace AixSocketDemo.Client
                     _logger.LogError($"{message.RequestId}请求超时，{ex.Message}");
                     throw ex;
                 }
+                finally
+                {
+                   // await client.CloseAsync();
+                }
             }
-            GC.Collect();
+            //GC.Collect();
         }
 
         private string GetLargeMsg(int length)

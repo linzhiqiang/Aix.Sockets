@@ -20,10 +20,11 @@ namespace Aix.SocketCore.EventLoop
         /// </summary>
         /// <param name="action"></param>
         /// <param name="delay"></param>
-        void Schedule(IRunnable action, TimeSpan delay);
+        IScheduledRunnable Schedule(IRunnable action, TimeSpan delay);
 
-        void Schedule(Action action, TimeSpan delay);
+        IScheduledRunnable Schedule(Action action, TimeSpan delay);
 
+        void RemoveScheduled(IScheduledRunnable task);
 
         void Start();
 

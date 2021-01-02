@@ -1,4 +1,5 @@
 ﻿using Aix.SocketCore.Buffers;
+using Aix.SocketCore.Config;
 using Aix.SocketCore.EventLoop;
 using Aix.SocketCore.Foundation;
 using AixSocket.Logging;
@@ -65,9 +66,7 @@ namespace Aix.SocketCore.Channels.Sockets
 
         protected override EndPoint LocalAddressInternal => this.Socket.LocalEndPoint;
 
-        protected override EndPoint RemoteAddressInternal => CurrentRemoteEndPoint;//this.Socket.RemoteEndPoint;
-
-        private EndPoint CurrentRemoteEndPoint;
+        protected override EndPoint RemoteAddressInternal => this.Socket.RemoteEndPoint;
 
         private TaskCompletionSource ConnectPromise;
 
@@ -90,16 +89,15 @@ namespace Aix.SocketCore.Channels.Sockets
             throw new NotSupportedException();
         }
 
-        public async Task UnsafeConnectAsync(EndPoint remoteAddress)
+        public  Task UnsafeConnectAsync(EndPoint remoteAddress)
         {
-            if (Open) return;
+            if (Open) return Task.CompletedTask;
 
             if (ConnectPromise != null)
             {
                 throw new InvalidOperationException("connection attempt already made");
             }
 
-            CurrentRemoteEndPoint = remoteAddress;
             var connectEventArgs = new SocketChannelAsyncOperation(this);
             connectEventArgs.RemoteEndPoint = remoteAddress;
             connectEventArgs.Completed += IO_Completed;
@@ -110,20 +108,36 @@ namespace Aix.SocketCore.Channels.Sockets
             }
             else
             {
+                var timeout = ConfigContainer.Instance.ConnectTimeoutSecond;//10秒
                 ConnectPromise = new TaskCompletionSource(remoteAddress);
+              var scheduled=  this.EventExecutor.Schedule(()=> {
+                  var cause = new TimeoutException("connection timed out: " + timeout.ToString());
+                  
+                  if (ConnectPromise != null && ConnectPromise.TrySetException(cause))
+                  {
+                     //close
+                  }
+                },TimeSpan.FromSeconds(timeout));
+
+                ConnectPromise.Task.ContinueWith((t,s)=> {
+                    scheduled?.Cancel();
+                    ConnectPromise = null;
+
+                },null);
+                return ConnectPromise.Task;
                 //这里做个超时处理
-                try
-                {
-                    await ConnectPromise.Task.TimeoutAfter(TimeSpan.FromSeconds(10));
-                }
-                catch (TimeoutException)
-                {
-                    ConnectPromise.SetException(new TimeoutException("连接超时"));
-                }
-                await ConnectPromise.Task;
+                //try
+                //{
+                //    await ConnectPromise.Task.TimeoutAfter(TimeSpan.FromSeconds(timeout));
+                //}
+                //catch (TimeoutException)
+                //{
+                //    ConnectPromise.SetException(new TimeoutException("连接超时"));
+                //}
+                //await ConnectPromise.Task;
             }
 
-
+            return Task.CompletedTask;
         }
 
         private void ConnectFinish(SocketAsyncEventArgs e)
@@ -138,7 +152,7 @@ namespace Aix.SocketCore.Channels.Sockets
             else
             {
                 this.UnsafeCloseAsync();
-                this.Pipeline.FireExceptionCaught(new SocketException((int)e.SocketError));
+               // this.Pipeline.FireExceptionCaught(new SocketException((int)e.SocketError));
                 promise.TrySetException(new SocketException((int)e.SocketError));
             }
 
@@ -393,7 +407,6 @@ namespace Aix.SocketCore.Channels.Sockets
         #endregion
 
         #endregion
-
 
     }
 }

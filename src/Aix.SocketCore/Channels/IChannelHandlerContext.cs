@@ -246,17 +246,17 @@ namespace Aix.SocketCore.Channels
             }
         }
 
-        async Task InvokeDeregisterAsync()
+         Task InvokeDeregisterAsync()
         {
             try
             {
-                await this.Handler.DeregisterAsync(this);
+                return  this.Handler.DeregisterAsync(this);
             }
             catch (Exception ex)
             {
                 this.NotifyHandlerException(ex);
             }
-
+            return Task.CompletedTask;
         }
 
         public Task BindAsync(EndPoint localAddress)
@@ -274,17 +274,17 @@ namespace Aix.SocketCore.Channels
             }
         }
 
-        async Task InvokeBindAsync(EndPoint localAddress)
+         Task InvokeBindAsync(EndPoint localAddress)
         {
             try
             {
-                await this.Handler.BindAsync(this, localAddress);
+                return  this.Handler.BindAsync(this, localAddress);
             }
             catch (Exception ex)
             {
                 this.NotifyHandlerException(ex);
             }
-
+            return Task.CompletedTask;
         }
 
         public Task ConnectAsync(EndPoint remoteAddress)
@@ -302,9 +302,18 @@ namespace Aix.SocketCore.Channels
             }
         }
 
-        async Task InvokeConnectAsync(EndPoint remoteAddress)
+         Task InvokeConnectAsync(EndPoint remoteAddress)
         {
-            await this.Handler.ConnectAsync(this, remoteAddress);
+            try
+            {
+                return this.Handler.ConnectAsync(this, remoteAddress);
+            }
+            catch (Exception ex)
+            {
+                this.NotifyHandlerException(ex);
+            }
+
+            return Task.CompletedTask;
         }
 
         public Task DisconnectAsync()
@@ -322,16 +331,18 @@ namespace Aix.SocketCore.Channels
             }
         }
 
-        async Task InvokeDisconnectAsync()
+         Task InvokeDisconnectAsync()
         {
             try
             {
-                await this.Handler.DisconnectAsync(this);
+                return this.Handler.DisconnectAsync(this);
             }
             catch (Exception ex)
             {
                 this.NotifyHandlerException(ex);
             }
+
+            return Task.CompletedTask;
 
         }
 
@@ -350,17 +361,17 @@ namespace Aix.SocketCore.Channels
             }
         }
 
-        async Task InvokeCloseAsync()
+         Task InvokeCloseAsync()
         {
             try
             {
-                await this.Handler.CloseAsync(this);
+                return  this.Handler.CloseAsync(this);
             }
             catch (Exception ex)
             {
                 this.NotifyHandlerException(ex);
             }
-
+            return Task.CompletedTask;
         }
 
         public Task WriteAsync(object message)
@@ -378,16 +389,18 @@ namespace Aix.SocketCore.Channels
             }
         }
 
-        async Task InvokeWriteAsync(object message)
+         Task InvokeWriteAsync(object message)
         {
             try
             {
-                await this.Handler.WriteAsync(this, message);
+                return  this.Handler.WriteAsync(this, message);
             }
             catch (Exception ex)
             {
                 this.NotifyHandlerException(ex);
             }
+
+            return Task.CompletedTask;
 
         }
 

@@ -171,27 +171,36 @@ namespace Aix.SocketCore.EventLoop
         //    Execute(new FuncRunnable(action));
         //}
 
-        private void Schedule(IScheduledRunnable task)
+        private IScheduledRunnable Schedule(IScheduledRunnable task)
         {
             this.Execute(() =>
             {
                 this.ScheduledTaskQueue.Enqueue(task);
             });
+            return task;
         }
-        public void Schedule(IRunnable action, TimeSpan delay)
+        public IScheduledRunnable Schedule(IRunnable action, TimeSpan delay)
         {
-            Schedule(new ScheduledRunnable(action, DateUtils.GetTimeStamp(DateTime.Now.Add(delay))));
+           return  Schedule(new ScheduledRunnable(this,action, DateUtils.GetTimeStamp(DateTime.Now.Add(delay))));
         }
 
-        public void Schedule(Action action, TimeSpan delay)
+        public IScheduledRunnable Schedule(Action action, TimeSpan delay)
         {
-            Schedule(new ActionRunnable(action), delay);
+            return Schedule(new ActionRunnable(action), delay);
         }
 
         //public void Schedule(Func<Task> action, TimeSpan delay)
         //{
         //    Schedule(new FuncRunnable(action), delay);
         //}
+
+        public void RemoveScheduled(IScheduledRunnable task)
+        {
+            this.Execute(() =>
+            {
+                this.ScheduledTaskQueue.Remove(task);
+            });
+        }
 
         public void Dispose()
         {

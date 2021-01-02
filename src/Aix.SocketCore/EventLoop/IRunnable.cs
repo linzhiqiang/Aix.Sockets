@@ -16,8 +16,8 @@ namespace Aix.SocketCore.EventLoop
         public ActionRunnable(Action action)
         {
             _action = action;
-
         }
+
         public void Run()
         {
             _action();

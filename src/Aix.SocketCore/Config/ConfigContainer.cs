@@ -10,6 +10,7 @@ namespace Aix.SocketCore.Config
         public const string Backlog = "Backlog";
         public const string AutoRead = "AutoRead";
         public const string HeartbeatIntervalSecond = "HeartbeatIntervalSecond";
+        public const string ConnectTimeoutSecond = "ConnectTimeoutSecond";
     }
     public class ConfigContainer
     {
@@ -28,6 +29,8 @@ namespace Aix.SocketCore.Config
 
 
         public int Backlog { get { return ToInt(GetValue(ConfigConstant.Backlog), 10240); } }
+
+        public int ConnectTimeoutSecond { get { return ToInt(GetValue(ConfigConstant.ConnectTimeoutSecond), 10); } }
 
         public bool AutoRead { get { return ToBool(GetValue(ConfigConstant.AutoRead), true); } }
 
