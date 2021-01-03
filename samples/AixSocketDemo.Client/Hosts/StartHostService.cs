@@ -102,13 +102,13 @@ namespace AixSocketDemo.Client
                     //}
 
                     //if (client != null) await Test(100, client);
-                    for (int i = 0; i < 1000; i++)
+                    for (int i = 0; i < 100000; i++)
                     {
                         IChannel client = null;
                         try
                         {
                             client = await bootstrap.ConnectAsync(new IPEndPoint(IPAddress.Parse(ip), port));
-                            await Test(100000, client);
+                            await Test(1, client);
                         }
                         catch (Exception ex)
                         {
@@ -116,7 +116,8 @@ namespace AixSocketDemo.Client
                         }
                         finally
                         {
-                           if(client!=null) await client?.CloseAsync();
+                            if (client != null) await client?.CloseAsync();
+
                         }
                     }
 

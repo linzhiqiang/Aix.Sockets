@@ -76,6 +76,7 @@ namespace Aix.SocketCore.Channels.Sockets
 
         public Task UnsafeBindAsync(EndPoint localAddress)
         {
+            //this.Socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
             this.Socket.Bind(localAddress);
             this.Socket.Listen(ConfigContainer.Instance.Backlog);
 

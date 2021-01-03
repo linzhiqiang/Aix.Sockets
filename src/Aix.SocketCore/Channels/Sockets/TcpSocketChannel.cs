@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Aix.SocketCore.Channels.Sockets
@@ -184,12 +185,11 @@ namespace Aix.SocketCore.Channels.Sockets
 
         public Task UnsafeCloseAsync()
         {
-            // if (this.Open)
-
-            if (this.Open)
-            {
-                With.NoException(() => this.Socket.Shutdown(SocketShutdown.Both));
-            }
+            // var promise = new TaskCompletionSource();
+            //if (this.Open)
+            //{
+            //    With.NoException(() => this.Socket.Shutdown(SocketShutdown.Both));
+            //}
             With.NoException(() => this.Socket.Dispose());
             if (ReceiveEventArgs != null)
             {
@@ -203,7 +203,11 @@ namespace Aix.SocketCore.Channels.Sockets
                 this.Open = false;
                 this.Pipeline.FireChannelInactive();
             }
+            //promise.TryComplete();
+            //return promise.Task;
+
             return Task.CompletedTask;
+
         }
 
         public Task UnsafeWriteAsync(object message)
