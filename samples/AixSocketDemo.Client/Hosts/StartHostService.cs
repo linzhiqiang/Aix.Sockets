@@ -48,6 +48,7 @@ namespace AixSocketDemo.Client
 
         public async Task Test()
         {
+            int heartbeatIntervalSecond = 60;
             InternalLoggerFactory.DefaultFactory = _loggerFactory;//.AddConsoleLogger();
 
             //实际要考虑事件循环的共用，事件循环的关闭问题
@@ -57,7 +58,7 @@ namespace AixSocketDemo.Client
             var bootstrap = new ClientBootstrap();
             bootstrap
                 .Group(workerGroup)
-                .Config(ConfigConstant.HeartbeatIntervalSecond, 60)
+                .Config(ConfigConstant.HeartbeatIntervalSecond, heartbeatIntervalSecond)
                 .Config(ConfigConstant.ConnectTimeoutSecond, 10)
                 .Channel<TcpSocketChannel>()
                 .WorkerHandler(channel =>
@@ -67,7 +68,7 @@ namespace AixSocketDemo.Client
                     channel.Pipeline.AddLast("MessageDecoder", new MessageDecoder());
 
                     channel.Pipeline.AddLast("MessageEncoder", new MessageEncoder());
-                    channel.Pipeline.AddLast("IdleStateHandler", new IdleStateHandler(0, 0, 60));
+                    channel.Pipeline.AddLast("IdleStateHandler", new IdleStateHandler(0, 0, heartbeatIntervalSecond));
                     channel.Pipeline.AddLast("ClientHeartbeatHandler", new ClientHeartbeatHandler());
                     channel.Pipeline.AddLast("ServerHandler", new ClientHandler());
 
@@ -82,11 +83,11 @@ namespace AixSocketDemo.Client
         int port = 8007;
         private async Task Test(ClientBootstrap bootstrap)
         {
-           // var ip = "127.0.0.1";
+            // var ip = "127.0.0.1";
             //ip="192.168.111.133";
-           // int port = 8007;
-
-            for (int i = 0; i < 1; i++)
+            // int port = 8007;
+            //  ip = "192.168.3.5";
+            for (int i = 0; i < 10; i++)
             {
                 Task.Run(async () =>
                 {
@@ -101,19 +102,31 @@ namespace AixSocketDemo.Client
                     //}
 
                     //if (client != null) await Test(100, client);
-                    var client = await bootstrap.ConnectAsync(new IPEndPoint(IPAddress.Parse(ip), port));
-                    for (int i = 0; i < 100000; i++)
+                    for (int i = 0; i < 1000; i++)
                     {
-                       
-                        await Test(1, client);
+                        IChannel client = null;
+                        try
+                        {
+                            client = await bootstrap.ConnectAsync(new IPEndPoint(IPAddress.Parse(ip), port));
+                            await Test(100000, client);
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine(ex.ToString());
+                        }
+                        finally
+                        {
+                           if(client!=null) await client?.CloseAsync();
+                        }
                     }
+
                 });
 
                 // await Task.Delay(10);
             }
         }
 
-        
+
 
         static int Count = 0;
         private async Task Test(int count, IChannel client)
@@ -137,6 +150,10 @@ namespace AixSocketDemo.Client
                     messageRes = await tcs.Task;
                     var str = Encoding.UTF8.GetString(messageRes.Data);
                     var countIndex = Interlocked.Increment(ref Count);
+                    if (countIndex == 16280)
+                    {
+
+                    }
                     _logger.LogInformation("接收数据：" + (countIndex) + "***********" + str);
                 }
                 catch (TimeoutException ex)
@@ -147,7 +164,7 @@ namespace AixSocketDemo.Client
                 }
                 finally
                 {
-                   // await client.CloseAsync();
+                    // await client.CloseAsync();
                 }
             }
             //GC.Collect();

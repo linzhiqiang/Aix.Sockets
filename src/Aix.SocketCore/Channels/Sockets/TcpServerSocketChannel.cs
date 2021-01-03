@@ -33,6 +33,7 @@ namespace Aix.SocketCore.Channels.Sockets
             : base(null)
         {
             this.Socket = socket;
+            //Socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, 1);
             this.Open = true;
             this.CacheLocalAddress();
             this.CacheRemoteAddress();

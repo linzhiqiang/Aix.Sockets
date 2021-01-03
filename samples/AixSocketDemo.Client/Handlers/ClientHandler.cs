@@ -62,7 +62,8 @@ namespace AixSocketDemo.Client.Handlers
             IPEndPoint remoteIp = context.Channel.RemoteAddress as IPEndPoint;
             string ip = remoteIp.Address.MapToIPv4().ToString() + ":" + remoteIp.Port;
             Logger.LogError(exception, $"异常：{ip}");
-            base.ExceptionCaught(context, exception);
+            context.CloseAsync();
+            //base.ExceptionCaught(context, exception);
         }
     }
 }

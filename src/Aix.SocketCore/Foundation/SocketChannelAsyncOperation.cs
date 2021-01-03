@@ -13,5 +13,14 @@ namespace Aix.SocketCore.Foundation
         {
             Channel = channel;
         }
+
+        public void Validate()
+        {
+            SocketError socketError = this.SocketError;
+            if (socketError != SocketError.Success)
+            {
+                throw new SocketException((int)socketError);
+            }
+        }
     }
 }

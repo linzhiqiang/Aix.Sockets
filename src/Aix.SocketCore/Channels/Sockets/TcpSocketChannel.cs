@@ -2,6 +2,7 @@
 using Aix.SocketCore.Config;
 using Aix.SocketCore.EventLoop;
 using Aix.SocketCore.Foundation;
+using Aix.SocketCore.Utils;
 using AixSocket.Logging;
 using Microsoft.Extensions.Logging;
 using System;
@@ -66,7 +67,23 @@ namespace Aix.SocketCore.Channels.Sockets
 
         protected override EndPoint LocalAddressInternal => this.Socket.LocalEndPoint;
 
-        protected override EndPoint RemoteAddressInternal => this.Socket.RemoteEndPoint;
+        protected override EndPoint RemoteAddressInternal
+        {
+            get
+            {
+                try
+                {
+                    return this.Socket.RemoteEndPoint;
+                }
+                catch
+                {
+                    return RequestRemoteAddress;
+                }
+            }
+
+        }
+
+        private EndPoint RequestRemoteAddress;
 
         private TaskCompletionSource ConnectPromise;
 
@@ -89,7 +106,7 @@ namespace Aix.SocketCore.Channels.Sockets
             throw new NotSupportedException();
         }
 
-        public  Task UnsafeConnectAsync(EndPoint remoteAddress)
+        public Task UnsafeConnectAsync(EndPoint remoteAddress)
         {
             if (Open) return Task.CompletedTask;
 
@@ -97,7 +114,7 @@ namespace Aix.SocketCore.Channels.Sockets
             {
                 throw new InvalidOperationException("connection attempt already made");
             }
-
+            RequestRemoteAddress = remoteAddress;
             var connectEventArgs = new SocketChannelAsyncOperation(this);
             connectEventArgs.RemoteEndPoint = remoteAddress;
             connectEventArgs.Completed += IO_Completed;
@@ -110,20 +127,21 @@ namespace Aix.SocketCore.Channels.Sockets
             {
                 var timeout = ConfigContainer.Instance.ConnectTimeoutSecond;//10秒
                 ConnectPromise = new TaskCompletionSource(remoteAddress);
-              var scheduled=  this.EventExecutor.Schedule(()=> {
-                  var cause = new TimeoutException("connection timed out: " + timeout.ToString());
-                  
-                  if (ConnectPromise != null && ConnectPromise.TrySetException(cause))
-                  {
-                     //close
-                  }
-                },TimeSpan.FromSeconds(timeout));
+                var scheduled = this.EventExecutor.Schedule(() =>
+                {
+                    var cause = new TimeoutException("connection timed out: " + timeout.ToString());
+                    if (ConnectPromise != null && ConnectPromise.TrySetException(cause))
+                    {
+                        Util.CloseSafe(this);
+                    }
+                }, TimeSpan.FromSeconds(timeout));
 
-                ConnectPromise.Task.ContinueWith((t,s)=> {
+                ConnectPromise.Task.ContinueWith((t, s) =>
+                {
                     scheduled?.Cancel();
                     ConnectPromise = null;
 
-                },null);
+                }, null);
                 return ConnectPromise.Task;
                 //这里做个超时处理
                 //try
@@ -152,7 +170,7 @@ namespace Aix.SocketCore.Channels.Sockets
             else
             {
                 this.UnsafeCloseAsync();
-               // this.Pipeline.FireExceptionCaught(new SocketException((int)e.SocketError));
+                // this.Pipeline.FireExceptionCaught(new SocketException((int)e.SocketError));
                 promise.TrySetException(new SocketException((int)e.SocketError));
             }
 
@@ -166,24 +184,24 @@ namespace Aix.SocketCore.Channels.Sockets
 
         public Task UnsafeCloseAsync()
         {
+            // if (this.Open)
+
             if (this.Open)
             {
-                try
-                {
-                    this.Open = false;
-                    this.Socket.Shutdown(SocketShutdown.Both);
-                    this.Socket.Dispose();
-                    if (ReceiveEventArgs != null)
-                    {
-                        ReceiveEventArgs.Dispose();
-                        ReceiveEventArgs = null;
-                    }
-                }
-                finally
-                {
-                    this.Pipeline.FireChannelInactive();
-                }
+                With.NoException(() => this.Socket.Shutdown(SocketShutdown.Both));
+            }
+            With.NoException(() => this.Socket.Dispose());
+            if (ReceiveEventArgs != null)
+            {
+                With.NoException(() => ReceiveEventArgs.Dispose());
+                ReceiveEventArgs = null;
+            }
 
+
+            if (this.Open)  //只有有效的连接 才触发连接断开事件
+            {
+                this.Open = false;
+                this.Pipeline.FireChannelInactive();
             }
             return Task.CompletedTask;
         }
@@ -209,15 +227,15 @@ namespace Aix.SocketCore.Channels.Sockets
                     Logger.LogError($"Send SocketError:{errorCode}");
                     throw new SocketException((int)errorCode);
                 }
-            //if (errorCode != SocketError.Success && errorCode != SocketError.WouldBlock)
-            //{
-            //    throw new SocketException((int)errorCode);
-            //}
-            //if (errorCode == SocketError.WouldBlock)
-            //{
-            //    throw new SocketException((int)errorCode);
-            //}
-            return false;
+                //if (errorCode != SocketError.Success && errorCode != SocketError.WouldBlock)
+                //{
+                //    throw new SocketException((int)errorCode);
+                //}
+                //if (errorCode == SocketError.WouldBlock)
+                //{
+                //    throw new SocketException((int)errorCode);
+                //}
+                return false;
             });
 
         }

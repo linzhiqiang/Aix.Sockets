@@ -42,7 +42,7 @@ namespace AixSocketDemo.Server
         {
             await CloseAsync();
         }
-
+        int heartbeatIntervalSecond = 60;
         MultithreadEventLoopGroup BossGroup = null;
         MultithreadEventLoopGroup WorkerGroup = null;
         IChannel ServerChannel = null;
@@ -60,7 +60,7 @@ namespace AixSocketDemo.Server
                 .Group(BossGroup, WorkerGroup)
                 .Config(ConfigConstant.Backlog, 10240)
                 .Config(ConfigConstant.ConnectTimeoutSecond, 10)
-                .Config(ConfigConstant.HeartbeatIntervalSecond, 60)
+                .Config(ConfigConstant.HeartbeatIntervalSecond, heartbeatIntervalSecond)
                 .Channel<TcpServerSocketChannel>()
                 .BossHandler(channel =>
                 {
@@ -74,7 +74,7 @@ namespace AixSocketDemo.Server
 
 
                     channel.Pipeline.AddLast("MessageEncoder", new MessageEncoder());
-                    channel.Pipeline.AddLast("IdleStateHandler", new IdleStateHandler(0, 0, 60 + 5));
+                    channel.Pipeline.AddLast("IdleStateHandler", new IdleStateHandler(0, 0, heartbeatIntervalSecond + 5));
                     channel.Pipeline.AddLast("ServerHeartbeatHandler", new ServerHeartbeatHandler());
                     //channel.Pipeline.AddLast("AuthHandler", new AuthHandler());
                     channel.Pipeline.AddLast("ServerHandler", new ServerHandler());
