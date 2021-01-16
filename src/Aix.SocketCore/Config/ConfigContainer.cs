@@ -11,6 +11,7 @@ namespace Aix.SocketCore.Config
         public const string AutoRead = "AutoRead";
         public const string HeartbeatIntervalSecond = "HeartbeatIntervalSecond";
         public const string ConnectTimeoutSecond = "ConnectTimeoutSecond";
+        public const string BufferSize = "BufferSize";
     }
     public class ConfigContainer
     {
@@ -37,7 +38,19 @@ namespace Aix.SocketCore.Config
         /// <summary>
         /// 心跳 单位秒 
         /// </summary>
-        public int HeartbeatIntervalSecond{ get { return ToInt(GetValue(ConfigConstant.HeartbeatIntervalSecond), 0); } }
+        public int HeartbeatIntervalSecond { get { return ToInt(GetValue(ConfigConstant.HeartbeatIntervalSecond), 0); } }
+
+        /// <summary>
+        /// 读写缓存区大小 默认256
+        /// </summary>
+        public int BufferSize
+        {
+            get
+            {
+                var size = ToInt(GetValue(ConfigConstant.BufferSize), 0);
+                return size > 0 ? size : 256;
+            }
+        }
 
         private static object GetValue(string key)
         {

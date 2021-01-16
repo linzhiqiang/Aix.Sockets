@@ -8,11 +8,36 @@ namespace Aix.SocketCore.Codecs
 {
     public class LengthFieldBasedFrameDecoder : ByteToMessageDecoder
     {
+        /// <summary>
+        /// 整体最大长度
+        /// </summary>
         readonly int maxFrameLength;
+
+        /// <summary>
+        /// 长度字段的偏移位置（离首位的距离）
+        /// </summary>
         readonly int lengthFieldOffset;
+
+        /// <summary>
+        /// 长度字段的长度（占几位 如int占4位）
+        /// </summary>
         readonly int lengthFieldLength;
+
+        /// <summary>
+        /// 长度字段的结尾位置的偏移量 = lengthFieldOffset + lengthFieldLength;
+        /// </summary>
         readonly int lengthFieldEndOffset;
+
+        /// <summary>
+        /// 长度修正值 在总长被定义为包含包头长度时，修正信息长度 ，就是长度域值是否包含头部或其他长度，实现中认为长度域值是后面具体内容的长度，如果包含其他，这里请修正即可
+        /// 总长度  =长度域值(长度字段的值)+lengthAdjustment+lengthFieldEndOffset(前面头长度= lengthFieldOffset + lengthFieldLength)
+        /// 例如：1 长度域值是整包的长度，包含头部 2:   在长度字段和具体内容中间 再增加一些其他信息
+        /// </summary>
         readonly int lengthAdjustment;
+
+        /// <summary>
+        /// 跳过的字节数，根据需要可以跳过固定的字节数，让上层直接接受某些内容或具体内容，比如我们把头部跳过，设为0时，上层接受的buff是整个包的内容
+        /// </summary>
         readonly int initialBytesToStrip;
 
         public LengthFieldBasedFrameDecoder(int maxFrameLength, int lengthFieldOffset, int lengthFieldLength)

@@ -75,6 +75,10 @@ namespace AixSocketDemo.Client
                     //便于理解 这里都是addlist 入站是从上外下执行的，出站是从下往上执行的
                 });
 
+            //这里创建连接 如果连接失败 会抛异常。如果连接成功以后，连接再断开会触发ChannelInactive 事件
+            //可以管理连接封装起来，首次连接失败 通过捕获异常进行重试，连接后再断开在ChannelInactive 事件中 进行连接重试
+            var client = await bootstrap.ConnectAsync(new IPEndPoint(IPAddress.Parse(ip), port));
+
             await Test(bootstrap);
 
         }

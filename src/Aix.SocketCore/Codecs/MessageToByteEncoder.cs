@@ -1,5 +1,6 @@
 ﻿using Aix.SocketCore.Buffers;
 using Aix.SocketCore.Channels;
+using Aix.SocketCore.Config;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -15,7 +16,7 @@ namespace Aix.SocketCore.Codecs
             if (message is T)
             {
                 var cast = (T)message;
-                IByteBuffer byteBuffer = new ByteBuffer(256, int.MaxValue);
+                IByteBuffer byteBuffer = new ByteBuffer(ConfigContainer.Instance.BufferSize, int.MaxValue);
                 this.Encode(context, cast, byteBuffer);
 
                 if (byteBuffer.IsReadable())

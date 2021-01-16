@@ -17,6 +17,7 @@ namespace AixSocketDemo.Common.Codecs
         private static int FixHeaderLength = 8;
         protected override void Encode(IChannelHandlerContext context, Message message, IByteBuffer output)
         {
+            //这里都是大端读写
             //前四个字节
             output.WriteByte(message.Reserved1);
             output.WriteByte(message.Reserved2);

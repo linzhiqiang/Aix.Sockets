@@ -127,6 +127,12 @@ namespace Aix.SocketCore.Buffers
             }
         }
 
+        /// <summary>
+        ///  设置为大端 网络字节序
+        /// </summary>
+        /// <param name="memory"></param>
+        /// <param name="index"></param>
+        /// <param name="value"></param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void SetInt(byte[] memory, int index, int value)
         {
@@ -140,6 +146,12 @@ namespace Aix.SocketCore.Buffers
             }
         }
 
+        /// <summary>
+        /// 设置为小端
+        /// </summary>
+        /// <param name="memory"></param>
+        /// <param name="index"></param>
+        /// <param name="value"></param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void SetIntLE(byte[] memory, int index, int value)
         {

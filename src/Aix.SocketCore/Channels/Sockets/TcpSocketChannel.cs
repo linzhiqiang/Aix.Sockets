@@ -347,7 +347,7 @@ namespace Aix.SocketCore.Channels.Sockets
                 {
                     if (e.SocketError == SocketError.Success)
                     {
-                        var byteBuf = new ByteBuffer(256, int.MaxValue);
+                        var byteBuf = new ByteBuffer(ConfigContainer.Instance.BufferSize, int.MaxValue);
                         int received = e.AcceptSocket.Receive(byteBuf.Array, byteBuf.WriterIndex, byteBuf.WritableBytes, SocketFlags.None, out SocketError errorCode);
                         if (errorCode != SocketError.Success)
                         {

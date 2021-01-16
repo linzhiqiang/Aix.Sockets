@@ -4,6 +4,9 @@ using System.Text;
 
 namespace Aix.SocketCore.Buffers
 {
+    /// <summary>
+    /// 默认都是大端读写 LE是小端读写
+    /// </summary>
   public class ByteBuffer : IByteBuffer
     {
         const int CalculateThreshold = 1048576 * 4; // 4 MiB page

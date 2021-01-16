@@ -18,6 +18,7 @@ namespace AixSocketDemo.Common.Codecs
         protected override void Decode(IChannelHandlerContext context, IByteBuffer byteBuffer, List<object> output)
         {
             Message message = new Message();
+            //这里都是大端读写
             //前四个字节
             message.Reserved1 = byteBuffer.ReadByte();
             message.Reserved2 = byteBuffer.ReadByte();

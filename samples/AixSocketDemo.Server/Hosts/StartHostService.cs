@@ -61,6 +61,7 @@ namespace AixSocketDemo.Server
                 .Config(ConfigConstant.Backlog, 10240)
                 .Config(ConfigConstant.ConnectTimeoutSecond, 10)
                 .Config(ConfigConstant.HeartbeatIntervalSecond, heartbeatIntervalSecond)
+                .Config(ConfigConstant.BufferSize,256)
                 .Channel<TcpServerSocketChannel>()
                 .BossHandler(channel =>
                 {
