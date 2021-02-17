@@ -7,7 +7,7 @@ namespace Aix.SocketCore.Buffers
     public interface IByteBuffer
     {
         #region 基本
-        byte[] Array { get; }
+       byte[] Array { get; }
 
         int Capacity { get; }
 
@@ -24,6 +24,8 @@ namespace Aix.SocketCore.Buffers
         IByteBuffer SetReaderIndex(int readerIndex);
 
         IByteBuffer SetIndex(int readerIndex, int writerIndex);
+
+        //ArraySegment<byte> GetIoBuffer();
 
         int ReadableBytes { get; }
 
@@ -233,6 +235,12 @@ namespace Aix.SocketCore.Buffers
 
         IByteBuffer WriteBytes(byte[] src);
         #endregion
+
+        /// <summary>
+        /// 返回只读buffer
+        /// </summary>
+        /// <returns></returns>
+        IByteBuffer Slice();
 
         /// <summary>
         /// 返回只读buffer

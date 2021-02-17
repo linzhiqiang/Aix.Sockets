@@ -32,6 +32,7 @@ namespace Aix.SocketCore.Bootstrapping
                 child.Pipeline.FireChannelActive();
             });
 
+            //交给下一个handler
             context.FireChannelRead(message);
         }
 

@@ -4,10 +4,16 @@ using System.Text;
 
 namespace Aix.SocketCore.Buffers
 {
+    //public class AbstractByteBuffer : IByteBuffer
+    //{ 
+
+    //}
+
+ 
     /// <summary>
     /// 默认都是大端读写 LE是小端读写
     /// </summary>
-  public class ByteBuffer : IByteBuffer
+    public class ByteBuffer : IByteBuffer
     {
         const int CalculateThreshold = 1048576 * 4; // 4 MiB page
         byte[] _array;
@@ -71,6 +77,17 @@ namespace Aix.SocketCore.Buffers
             WriterIndex = writerIndex;
             return this;
         }
+
+        //public ArraySegment<byte> GetIoBuffer()
+        //{ 
+        //return this.GetIoBuffer(this.ReaderIndex, this.ReadableBytes);
+        //}
+        //public  ArraySegment<byte> GetIoBuffer(int index, int length)
+        //{
+        //    this.CheckIndex(index, length);
+        //    return new ArraySegment<byte>(this.Array, index, length);
+        //}
+
 
         ////////////////////////////////////
 
@@ -745,6 +762,11 @@ namespace Aix.SocketCore.Buffers
         }
 
         #endregion
+
+        public IByteBuffer Slice()
+        {
+            return this.Slice(this.ReaderIndex,this.ReadableBytes);
+        }
 
         /// <summary>
         /// 返回只读buffer

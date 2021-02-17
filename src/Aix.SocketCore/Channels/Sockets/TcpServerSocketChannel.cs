@@ -81,7 +81,7 @@ namespace Aix.SocketCore.Channels.Sockets
             this.Socket.Listen(ConfigContainer.Instance.Backlog);
 
             this.Pipeline.FireChannelActive();
-            // this.Read();//在FireChannelActive里面开始读了
+            // this.Read();//在IChannelPipeline.FireChannelActive里面开始读了
 
             return Task.CompletedTask;
         }

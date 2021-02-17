@@ -347,7 +347,7 @@ namespace Aix.SocketCore.Channels.Sockets
                 {
                     if (e.SocketError == SocketError.Success)
                     {
-                        var byteBuf = new ByteBuffer(ConfigContainer.Instance.BufferSize, int.MaxValue);
+                        IByteBuffer byteBuf = new ByteBuffer(ConfigContainer.Instance.BufferSize, int.MaxValue);
                         int received = e.AcceptSocket.Receive(byteBuf.Array, byteBuf.WriterIndex, byteBuf.WritableBytes, SocketFlags.None, out SocketError errorCode);
                         if (errorCode != SocketError.Success)
                         {
@@ -419,11 +419,11 @@ namespace Aix.SocketCore.Channels.Sockets
             }
             catch (Exception ex)
             {
-                this.Pipeline.FireExceptionCaught(ex);
+                this.Pipeline.FireExceptionCaught(ex); //触发异常事件，是否需要关闭 由异常事件中处理决定
             }
             if (closed)
             {
-                this.UnsafeCloseAsync();
+                this.UnsafeCloseAsync(); //由于网络原因需要关闭
             }
         }
         #endregion
